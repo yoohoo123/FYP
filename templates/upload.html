@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block body %}
+        <h3>Select a file to upload</h3>
+        <form method="post" action="/upload" enctype="multipart/form-data">
+             <p>
+              <input type="file" name="inputFile" autocomplete="off" required onchange="loadFile(event)">
+             </p>
+               <p>
+             <input type="submit" value="Submit">
+            </p>
+           </form>
+           <label id="output" width="500"/>
+            
+           <style>
+           .alert-primary {
+               color: #004085;
+               background-color: #cce5ff;
+               border-color: #b8daff;
+           }
+           .alert {
+               position: relative;
+               padding: .75rem 1.25rem;
+               margin-bottom: 1rem;
+               border: 1px solid transparent;
+               border-radius: .25rem;
+           }
+           </style>
+           {% endblock %}
