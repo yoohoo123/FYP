@@ -21,7 +21,3 @@ Restrictions:
 - no logout page yet
 - local host
 - no dashboard to show graphs(i need abit more time sorry)
-
-How to run
-- Download all the files
-- run app.py

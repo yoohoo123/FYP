@@ -5,6 +5,7 @@
 
 
 
+from unittest import TestCase
 from flask import Flask, render_template,request, url_for, redirect ,flash
 from flask_mongoengine import MongoEngine
 from pymongo import MongoClient
@@ -14,6 +15,7 @@ import os
 import urllib.request
 import pandas as pd
 import glob
+from pandas import DataFrame
 
 from login import *
 from upload import *
@@ -39,6 +41,11 @@ ALLOWED_EXTENSIONS = set(['csv', 'xlsx', 'xls', 'txt'])
 db = MongoEngine()
 db.init_app(app)  
 
+#call default csv from collection and turn into df
+database = mongo.db
+collection = database.disney_movies.csv
+df = DataFrame(list(collection.find({})))
+
 class User(db.Document):
     filepath = db.StringField()
     
@@ -59,7 +66,7 @@ def login():
     if login_user:
         if bcrypt.hashpw(request.form['password'].encode('utf-8'), login_user['password']) == login_user['password']:
             session['username'] = request.form['username']
-            return render_template('upload.html')
+            return redirect(url_for('upload'))
 
     return render_template('error.html')
 
@@ -86,6 +93,19 @@ def register():
 #     session.pop('username', None)
 #     return redirect(url_for('index'))
 
+@app.route('/upload' , methods=['GET', 'POST'])
+def movetoupload():
+    return render_template('upload.html')
+    
+@app.route('/graph' , methods=['GET', 'POST'])
+def movetoindex():
+    df = DataFrame(list(collection.find({})))
+    dfhtml = df.head(30).to_html(index=False)
+    graphJSON = figPlotly(df)
+    figstatic= figStatic(df)
+    return render_template('graph.html', table=dfhtml,graphJSON=graphJSON,figstatic=figstatic)                                           
+
+@app.route('/')
 def allowed_file(filename):
      return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
  
@@ -145,16 +165,111 @@ def upload():
                     # return render_template('upload.html')
             
 
-            
-
             flash('File successfully uploaded ' + file.filename + ' to the database!')
             return render_template('upload.html')
         else:
             flash('Unable to upload') 
             # return redirect('error.html')    
-        
+            
+#indexpage
+import matplotlib.pyplot as plt
+import json
+from io import BytesIO
+import base64
+import plotly
+import plotly.graph_objects as go
 
+def figStatic(df):
+    df = DataFrame(list(collection.find({})))
+    df["release_date"] = pd.to_datetime(df["release_date"])
+    with plt.style.context('dark_background'):
+        plt.rcParams['lines.linewidth'] = 2
+        plt.rcParams['lines.linestyle'] = '-.'
+        plt.rc('lines', marker='o', markerfacecolor='r', markersize=8, markeredgecolor="r")
+        #plt.rc('lines', linewidth=2, color='red',linestyle='-.')
+        plt.rcParams['figure.figsize'] = (20,9)
+        plt.rc("axes",titlesize=30, titlecolor="cyan",titlepad=10)
+        plt.rcParams.update({"axes.grid" : True, "grid.color": "red", "grid.alpha" : 0.5})
+        plt.rc("font", family="DejaVu Serif", fantasy="Comic Neue", size=20)
+        plt.rcParams["date.autoformatter.day"]= "%m-%d" #"%Y-%m"
+        # Sample half element of a series
+        xlist = []
+        data_list = list(df['release_date'])
+        for i in range(0, len(data_list),4):
+            xlist.append(data_list[i])
+        fig, ax = plt.subplots()
+        plt.plot(df["release_date"], df["total_gross"])
+        ax.set_title("Amount Earn")
+        ax.set_xticks( xlist)
+        ax.tick_params(axis='x',labelrotation=45,labelcolor='orange')
+        #ax.yaxis.grid(False)
+
+        figfile = BytesIO()
+        plt.savefig(figfile, format='png')
+        figfile.seek(0)  # rewind to beginning of file
+        #figdata_png = base64.b64encode(figfile.read())
+        figdata_png = base64.b64encode(figfile.getvalue())
+
+        #plt.savefig("static/image.png")
+        #fig.savefig("matplotlib_rcparams.png")
+        fig_decoded = figdata_png.decode('utf8')
+        return fig_decoded
     
+def figPlotly(df):
+    df = DataFrame(list(collection.find({})))
+    df["release_date"] = pd.to_datetime(df["release_date"])
+
+    xx = df["release_date"].values.tolist()
+    yy = df["total_gross"].values.tolist()
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+            x = xx,
+            y = yy,
+            name="Totale Casi",
+            mode="lines+markers",
+            showlegend=True,
+            marker=dict(
+                symbol="circle-dot",
+                size=6,
+            ),
+            line=dict(
+                width=1,
+                color="rgb(0,255,0)",
+                dash="longdashdot"
+            )
+        )
+    )
+    fig.update_layout(
+        title=dict(
+            text ="Amount Earn",
+            y = 0.9,
+            x = 0.5,
+            xanchor = "center",
+            yanchor = "top",
+        ),
+        legend=dict(
+            y = 0.9,
+            x = 0.03,
+        ),
+        xaxis_title="release_date",
+        yaxis_title="total_gross",
+        font=dict(
+            family="Courier New, monospace",
+            size=20,
+            color="orange", #"#7f7f7f", 
+        ),
+        hovermode='x',  #['x', 'y', 'closest', False]
+        plot_bgcolor = "rgb(10,10,10)",
+        paper_bgcolor="rgb(0,0,0)"
+    )
+
+    #htmlfig = fig.write_html("fig.html")
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    return graphJSON
+
+
 if __name__ == '__main__':
     app.secret_key = 'mysecret'
     app.run(debug=True)
