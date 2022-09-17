@@ -11,7 +11,12 @@ python
 	- werkzeug.utils
 	- flask-pymongo
 	- pandas
-	-glob
+	- glob
+	- json
+	- base64
+	- plotly
+	- io
+	- matplotlib
 Contents
 - basic login and upload files
 - templates folders are the html
