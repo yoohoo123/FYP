@@ -1,0 +1,18 @@
+<diagram program="umletino" version="15.0.0"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>110</x><y>70</y><w>200</w><h>70</h></coordinates><panel_attributes>Upload
+--
+How we upload to mongodb? 
+docker?
+Or a api maybe website to upload?</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>520</x><y>60</y><w>150</w><h>70</h></coordinates><panel_attributes>Batch processing
+--
+Connect to mongodb</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>710</x><y>100</y><w>180</w><h>70</h></coordinates><panel_attributes>Analysis and Reporting
+--
+Juypter</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>10</x><y>100</y><w>80</w><h>70</h></coordinates><panel_attributes>Data Source
+--
+.csv file</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>700</x><y>330</y><w>210</w><h>70</h></coordinates><panel_attributes>Display output(reporting)
+--
+How are we gonna show output?
+ website? .exe program?</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>330</x><y>100</y><w>140</w><h>70</h></coordinates><panel_attributes>Database
+--
+Mongodb</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>630</x><y>210</y><w>170</w><h>70</h></coordinates><panel_attributes>juypter connect to docker
+--
+How?</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>80</x><y>130</y><w>270</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>250;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>460</x><y>120</y><w>270</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>250;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>790</x><y>160</y><w>30</w><h>190</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;170;10;10</additional_attributes></element></diagram>
