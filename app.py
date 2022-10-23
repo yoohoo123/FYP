@@ -17,8 +17,7 @@ import pandas as pd
 import glob
 from pandas import DataFrame
 
-from login import *
-from upload import *
+
 
 #Connect to localhost mongodb
 app = Flask(__name__)
@@ -50,7 +49,7 @@ class User(db.Document):
     filepath = db.StringField()
     
 
-client = MongoClient("localhost", 27017, maxPoolSize=50)
+client = MongoClient('mongodb://mongodb:27017/')
 
 
 @app.route('/')
