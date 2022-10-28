@@ -17,6 +17,7 @@ python
 	- plotly
 	- io
 	- matplotlib
+	- bcrypt
 Contents
 - basic login and upload files
 - templates folders are the html
