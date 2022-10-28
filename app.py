@@ -16,6 +16,7 @@ import urllib.request
 import pandas as pd
 import glob
 from pandas import DataFrame
+import bcrypt
 
 from login import *
 from upload import *
@@ -29,9 +30,8 @@ app.config['MONGO_URI'] = 'mongodb://localhost:27017/Fyp-Test'
 
 mongo = PyMongo(app)
 
-#Conditions for uploading
-UPLOAD_FOLDER = 'app/uploaded_files'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# app.Configuration for uploading
+app.config['UPLOAD_FOLDER'] = '../uploaded_files'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 #Max of 16MB
 app.config['UPLOAD_PATH'] = ''
    
@@ -52,10 +52,66 @@ class User(db.Document):
 
 client = MongoClient("localhost", 27017, maxPoolSize=50)
 
-
+#Main Page
 @app.route('/')
 def main():
     return render_template('loginpage.html')
+
+def allowed_file(filename):
+     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+ 
+def ReadALLFiles(filepath):
+        #Import all csv files in the directory
+        all_files = glob.glob(filepath)
+        data_file = []
+        for filename in all_files:
+            df = pd.read_csv(filename, index_col=None, header=0,encoding='latin-1')
+            data_file.append(df)
+
+        df = pd.concat(data_file, axis=0, ignore_index=False)
+        
+        return df
+
+#Going to profile page
+@app.route('/profile', methods=['POST', 'GET'])
+def profile():
+    return render_template('profile.html')
+
+#Going to Home page
+@app.route('/home', methods=['POST', 'GET'])
+def home():
+    return render_template('home.html')
+
+#Going to the setting page
+@app.route('/settings', methods=['POST', 'GET'])
+def settings():
+    return render_template('settings.html')
+
+#Going to the logoutpage
+@app.route('/logout', methods=['POST', 'GET'])
+def logout():
+    return render_template('logout.html')
+
+# @app.route('/upload', methods=['POST', 'GET'])
+# def upload():
+#     return render_template('upload.html')
+
+#Going to the table page
+@app.route('/table', methods=['POST', 'GET'])
+def tables():
+    return render_template('tables.html')    
+
+#Going to the chart page
+@app.route('/chart', methods=['POST', 'GET'])
+def chart():
+    return render_template('chart.html')    
+
+#Going to the graph page
+@app.route('/graph2', methods=['POST', 'GET'])
+def graph2():
+    return render_template('graph2.html') 
+  
+
 
 #Login session
 @app.route('/loginpage', methods=['POST'])
@@ -95,7 +151,7 @@ def register():
 
 @app.route('/upload' , methods=['GET', 'POST'])
 def movetoupload():
-    return render_template('upload.html')
+    return render_template('upload2.html')
     
 @app.route('/graph' , methods=['GET', 'POST'])
 def movetoindex():
@@ -104,26 +160,15 @@ def movetoindex():
     graphJSON = figPlotly(df)
     figstatic= figStatic(df)
     return render_template('graph.html', table=dfhtml,graphJSON=graphJSON,figstatic=figstatic)                                           
-
-@app.route('/')
-def allowed_file(filename):
-     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
- 
-def ReadALLFiles(filepath):
-        #Import all csv files in the directory
-        all_files = glob.glob(filepath)
-        data_file = []
-        for filename in all_files:
-            df = pd.read_csv(filename, index_col=None, header=0,encoding='latin-1')
-            data_file.append(df)
-
-        df = pd.concat(data_file, axis=0, ignore_index=False)
-        
-        return df
     
-@app.route('/upload', methods=['POST'])
+    
+@app.route('/upload2', methods=['POST','GET'])
 def upload():
+        return render_template('upload2.html')
+def upload2():
+    #Upload file flask
     file = request.files['inputFile']
+    #Extract upload data file name
     filename = secure_filename(file.filename)
    
     # create the folders when setting up your app
@@ -132,12 +177,11 @@ def upload():
     if file and allowed_file(file.filename):
         #Upload to local filepaths
         if file !='': 
-            file_path = os.path.join(app.instance_path,'uploaded_files' , filename)
-            file.save(file_path)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
             usersave = User(filepath=file.filename)
             usersave.save()
             #Can only import csv
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(file)
             #Upload to mongodb
             dbase = client['Fyp-Test']
             
@@ -154,22 +198,27 @@ def upload():
                         #Insert df to mongodb
                         collectionNew = dbase[filename]
                         collectionNew.insert_many(df.to_dict('records'))
+                        
+                        #Display the table 
+                        df_html = df.to_html()
+                        
+                    
                         flash('Successful')
-                        # return render_template('upload.html')
+                        return render_template('upload2.html',data_var = df_html)
                     except: 
-                        flash('Collection has already exists')
-                        # return render_template('upload.html')
+                        flash('Collection name has already exists')
+                        return render_template('upload2.html')
                     
                 else:
                     flash('File name is repeated. Please try again.')
-                    # return render_template('upload.html')
+                    return render_template('upload2.html')
             
 
             flash('File successfully uploaded ' + file.filename + ' to the database!')
-            return render_template('upload.html')
+            return render_template('upload2.html')
         else:
             flash('Unable to upload') 
-            # return redirect('error.html')    
+            return redirect('error.html')    
             
 #indexpage
 import matplotlib.pyplot as plt
@@ -270,7 +319,29 @@ def figPlotly(df):
     return graphJSON
 
 
+##Error handling
+# @app.errorhandler(404)
+# def resource_not_found(e):
+#     """
+#     An error-handler to ensure that 404 errors are returned as JSON.
+#     """
+#     return jsonify(error=str(e)), 404
+
+
+# @app.errorhandler(DuplicateKeyError)
+# def resource_not_found(e):
+#     """
+#     An error-handler to ensure that MongoDB duplicate key errors are returned as JSON.
+#     """
+#     return jsonify(error=f"Duplicate key error."), 400
+
 if __name__ == '__main__':
     app.secret_key = 'mysecret'
-    app.run(debug=True)
+    app.debug = True
+    app.run()
+    
+def api_response():
+    from flask import jsonify
+    if request.method == 'POST':
+        return jsonify(**request.json)
     
