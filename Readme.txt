@@ -17,7 +17,6 @@ python
 	- plotly
 	- io
 	- matplotlib
-	- bcrypt
 Contents
 - basic login and upload files
 - templates folders are the html
@@ -27,3 +26,6 @@ Restrictions:
 - no logout page yet
 - local host
 - no dashboard to show graphs(i need abit more time sorry)
+
+css
+- boxicons 
