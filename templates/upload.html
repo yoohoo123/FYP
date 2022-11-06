@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 {% extends "layout.html" %}
 {% block body %}
 <form method="post" action="{{ url_for('upload') }}">
@@ -5,7 +6,7 @@
           <li><a href="{{ url_for('movetoupload') }}">Upload</a></li>
           <li><a href="{{ url_for('movetoindex') }}">Graphy</a></li>
         </ul>
-        <h3>Select a file to upload</h3>
+        <h3>Select a file to upload</h3> v
              <p>
               <input type="file" name="inputFile" autocomplete="off" required onchange="loadFile(event)">
              </p>
