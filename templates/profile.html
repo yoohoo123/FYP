@@ -65,7 +65,7 @@
             <div class="is-user-avatar">
               <img src="https://avatars.dicebear.com/api/pixel-art/weihao.svg" alt="Wei Hao">
             </div>
-            <div class="is-user-name"><span>Wei Hao</span></div>
+            <div class="is-user-name"><span>Profile</span></div>
             <span class="icon"><i class="mdi mdi-chevron-down"></i></span>
           </a>
           <div class="navbar-dropdown">
@@ -214,6 +214,7 @@
     </div>
   </section>
 <!-- main -->
+<form method=POST action="{{ url_for('profile') }}">
   <section class="section is-main-section">
     <div class="tile is-ancestor">
       <div class="tile is-parent">
@@ -226,22 +227,6 @@
           </header>
           <div class="card-content">
             <form>
-              <div class="field is-horizontal">
-                <div class="field-label is-normal"><label class="label">Avatar</label></div>
-                <div class="field-body">
-                  <div class="field">
-                    <div class="field file">
-                      <label class="upload control">
-                        <a class="button is-primary">
-                          <span class="icon"><i class="mdi mdi-upload default"></i></span>
-                          <span>Pick a file</span>
-                        </a>
-                        <input type="file">
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
               <hr>
               <div class="field is-horizontal">
                 <div class="field-label is-normal">
@@ -250,7 +235,7 @@
                 <div class="field-body">
                   <div class="field">
                     <div class="control">
-                      <input type="text" autocomplete="on" name="name" value="John Doe" class="input" required>
+                      <input type="text" autocomplete="on" name="accountname" value="" class="input" required>
                     </div>
                     <p class="help">Required. Your name</p>
                   </div>
@@ -270,48 +255,7 @@
                 </div>
               </div>
               <hr>
-              <div class="field is-horizontal">
-                <div class="field-label is-normal"></div>
-                <div class="field-body">
-                  <div class="field">
-                    <div class="control">
-                      <button type="submit" class="button is-primary">
-                        Submit
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </form>
-          </div>
-        </div>
-      </div>
-      <div class="tile is-parent">
-        <div class="card tile is-child">
-          <header class="card-header">
-            <p class="card-header-title">
-              <span class="icon"><i class="mdi mdi-account default"></i></span>
-              Profile
-            </p>
-          </header>
-          <div class="card-content">
-            <div class="is-user-avatar image has-max-width is-aligned-center">
-              <img src="https://avatars.dicebear.com/v2/initials/john-doe.svg" alt="John Doe">
-            </div>
-            <hr>
-            <div class="field">
-              <label class="label">Name</label>
-              <div class="control is-clearfix">
-                <input type="text" readonly value="John Doe" class="input is-static">
-              </div>
-            </div>
-            <hr>
-            <div class="field">
-              <label class="label">E-mail</label>
-              <div class="control is-clearfix">
-                <input type="text" readonly value="user@example.com" class="input is-static">
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -381,13 +325,13 @@
       </div>
     </div>
   </section>
+</form>
 
   <footer class="footer">
     <div class="container-fluid">
       <div class="level">
         <div class="level-left">
           <div class="level-item">
-            © 2020, JustBoil.me
           </div>
           <div class="level-item">
             <a href="https://github.com/vikdiesel/admin-one-bulma-dashboard" style="height: 20px">
