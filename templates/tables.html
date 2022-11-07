@@ -219,19 +219,6 @@
   <section class="section is-main-section">
     <div class="navbar-item has-control">
       <div class="control">
-<<<<<<< Updated upstream
-        <form method=GET action="{{ url_for('columnname') }}">
-        <input placeholder="Add into Search" class="input" list="columnnames">
-        <datalist id="columnnames">
-          {% for dict_item in columnnames %}
-            {% for key, value in dict_item.items() %}
-                <option>Key: {{key}}</option>
-            {% endfor %}
-          {% endfor %}
-        </datalist>
-      </form>
-      <div id='chart' class='chart'”></div>
-=======
         <form class="gettable" method="POST" action="{{ url_for('tables') }}">
           <label for="exampleFormControlFile2">Select a file: </label>
           <select id="columnname" name="columnname" style="width:500px;" >
@@ -258,7 +245,6 @@
             {% endfor %}  
           </h1>
         </table>
->>>>>>> Stashed changes
       </div>
     </div>
     <!--
@@ -1102,10 +1088,7 @@
   var graphs = {{df_html | safe}};
   Plotly.plot('chart',graphs,{});
 </script>
-<<<<<<< Updated upstream
-=======
 
 </script>
->>>>>>> Stashed changes
 </body>
 </html>
