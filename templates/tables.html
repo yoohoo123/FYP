@@ -213,9 +213,40 @@
       </div>
     </div>
   </section>
-
+  <script>
+  </script>
   <!-- main -->
   <section class="section is-main-section">
+    <div class="navbar-item has-control">
+      <div class="control">
+        <form class="gettable" method="POST" action="{{ url_for('tables') }}">
+          <label for="exampleFormControlFile2">Select a file: </label>
+          <select id="columnname" name="columnname" style="width:500px;" >
+            <option value= "Default" selected>Choose one</option>
+            {% for name in columnnames %}
+            {% if ".csv" in name%}
+            <option id = "name" value= "{{ name }}" >{{ name }}</option>
+            {% endif%}
+            {% endfor %}
+          </select>
+          <button type="submit" value="Submit" >GO</button>
+        </form>
+      <div id='chart' class='chart'></div>
+      </div>
+    </div>
+    <div>
+      <div>
+        <table id = "table" style="width: 500px;border-collapse: collapse;overflow: hidden;box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);">
+          <h1>
+            <!--Displaying the converted table-->
+            {% for table in df_html %}
+            <h2 style="text-align: left;background-color: #55608f;">{{titles[loop.index]}}</h2>                            
+            {{ table|safe }}
+            {% endfor %}  
+          </h1>
+        </table>
+      </div>
+    </div>
     <!--
     <div class="notification is-info">
       <div class="level">
@@ -971,24 +1002,6 @@
               </tbody>
             </table>
           </div>
-          <div class="notification">
-            <div class="level">
-              <div class="level-left">
-                <div class="level-item">
-                  <div class="buttons has-addons">
-                    <button type="button" class="button is-active">1</button>
-                    <button type="button" class="button">2</button>
-                    <button type="button" class="button">3</button>
-                  </div>
-                </div>
-              </div>
-              <div class="level-right">
-                <div class="level-item">
-                  <small>Page 1 of 3</small>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -1070,6 +1083,12 @@
 -->
 <!-- Scripts below are for demo only -->
 <script type="text/javascript" src="js/main.min.js"></script>
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  var graphs = {{df_html | safe}};
+  Plotly.plot('chart',graphs,{});
+</script>
 
+</script>
 </body>
 </html>
