@@ -217,10 +217,33 @@
   <section class="section is-main-section">
     <div class="navbar-item has-control">
       <div class="control">
-        <form method=POST action="{{ url_for('showgraph') }}">
-        <div id='graph' class='graph'></div>
+        <form class="gettable" method="POST" action="{{ url_for('graph2') }}">
+          <label for="exampleFormControlFile2">Select a file: </label>
+          <select id="columnname" name="columnname" style="width:500px;" >
+            <option value= "Default" selected>Choose one</option>
+            {% for name in columnnames %}
+            {% if ".csv" in name%}
+            <option id = "name" value= "{{ name }}" >{{ name }}</option>
+            {% endif%}
+            {% endfor %}
+          </select>
+          <button type="submit" value="Submit" >GO</button>
+        </form>
+      <div id='chart' class='chart'></div>
       </div>
-    </form>
+    </div>
+    <div>
+      <div>
+        <table id = "table">
+          <h1>
+            <!--Displaying the converted table-->
+            {% for table in df_html %}
+            <h2>{{titles[loop.index]}}</h2>                            
+            {{ table|safe }}
+            {% endfor %}  
+          </h1>
+        </table>
+      </div>
     </div>
   </section>
   <!-- Footer class -->
