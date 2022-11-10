@@ -38,8 +38,8 @@ app.config['UPLOAD_PATH'] = ''
 ALLOWED_EXTENSIONS = set(['csv', 'xlsx', 'xls', 'txt'])
 
 #User
-db = MongoEngine()
-db.init_app(app)  
+# db = MongoEngine()
+# db.init_app(app)  
 
 #call default csv from collection and turn into df
 database = mongo.db
@@ -288,15 +288,15 @@ import plotly
 import plotly.graph_objects as go
 
 #class for data
-class data():
-    def cleandata():
-        collection = dbase.list_collection_names()
+# class data():
+#     def cleandata():
+#         collection = dbase.list_collection_names()
         
-        #Get collections
-        for collectionName in collection:
-            mydata = dbase[collectionName].find({})
+#         #Get collections
+#         for collectionName in collection:
+#             mydata = dbase[collectionName].find({})
             
-        return mydata
+#         return cleandata
 
 def figStatic(df):
     df = DataFrame(list(dbase["disney_movies.csv"].find({})))
