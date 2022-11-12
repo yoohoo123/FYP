@@ -53,6 +53,8 @@ class User(db.Document):
     filepath = db.StringField()
     
 
+client = MongoClient("localhost", 27017, maxPoolSize=50)
+
 #Main Page
 @app.route('/')
 def main():
