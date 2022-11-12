@@ -214,45 +214,14 @@
       </section>
     
   <!-- Main Section -->
-  <section class="section is-main-section">
-    <div class="navbar-item has-control">
-      <div class="control">
-        <form class="gettable" method="POST" action="{{ url_for('graph2') }}">
-          <label for="exampleFormControlFile2">Select a file: </label>
-          <select id="columnname" name="columnname" style="width:500px;" >
-            <option value= "Default" selected>Choose one</option>
-            {% for name in columnnames %}
-            {% if ".csv" in name%}
-            <option id = "name" value= "{{ name }}" >{{ name }}</option>
-            {% endif%}
-            {% endfor %}
-          </select>
-          <button type="submit" value="Submit" >GO</button>
-        </form>
-      <div id='chart' class='chart'></div>
-      </div>
-    </div>
-    <div>
-      <div>
-        <table id = "table">
-          <h1>
-            <!--Displaying the converted table-->
-            {% for table in df_html %}
-            <h2>{{titles[loop.index]}}</h2>                            
-            {{ table|safe }}
-            {% endfor %}  
-          </h1>
-        </table>
-      </div>
-    </div>
-  </section>
+  
   <!-- Footer class -->
   <footer class="footer">
     <div class="container-fluid">
       <div class="level">
         <div class="level-left">
           <div class="level-item">
-            
+           
           </div>
           <div class="level-item">
           
@@ -291,11 +260,6 @@
 <script type="text/javascript" src="js/main.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
 <script type="text/javascript" src="js/chart.sample.min.js"></script>
-<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-<script type='text/javascript'>
-  var graphs = {{graphJSON | safe}};
-  Plotly.plot('graph',graphs,{});
-</script>
 
 </body>
 </html>

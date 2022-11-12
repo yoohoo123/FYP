@@ -6,7 +6,7 @@
 
 
 from unittest import TestCase
-from flask import Flask, render_template,request, url_for, redirect ,flash
+from flask import Flask, render_template,request, url_for, redirect ,flash, session , jsonify
 from flask_mongoengine import MongoEngine
 from pymongo import MongoClient
 from werkzeug.utils import secure_filename
@@ -15,13 +15,14 @@ import os
 import urllib.request
 import pandas as pd
 import glob
-from pandas import DataFrame
-
-from login import *
-from upload import *
+from pandas import DataFrame, json_normalize
+# import bcrypt
 
 #Connect to localhost mongodb
 app = Flask(__name__)
+
+#Root File
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 #Mongodb details
 app.config['MONGO_DBNAME'] = 'Fyp-Test'
@@ -31,7 +32,7 @@ mongo = PyMongo(app)
 
 # app.Configuration for uploading
 app.config['UPLOAD_FOLDER'] = '../uploaded_files'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 #Max of 16MB
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024 #Max of 16MB
 app.config['UPLOAD_PATH'] = ''
    
 ALLOWED_EXTENSIONS = set(['csv', 'xlsx', 'xls', 'txt'])
@@ -42,19 +43,43 @@ db.init_app(app)
 
 #call default csv from collection and turn into df
 database = mongo.db
-collection = database.disney_movies.csv
-df = DataFrame(list(collection.find({})))
+client = MongoClient('localhost', 27017)
+
+dbase = client['Fyp-Test']
+
+collection = dbase.list_collection_names()
 
 class User(db.Document):
     filepath = db.StringField()
     
 
-client = MongoClient("localhost", 27017, maxPoolSize=50)
-
 #Main Page
 @app.route('/')
 def main():
-    return render_template('home.html')
+    #default admin account
+    admin = {
+        "name" : "admin",
+        "password" : "hashpw",
+        "mainpassword" : "1234"
+    }
+    
+    user = "users"
+    #Create default admin account
+    for collectionName in collection:
+        mydata = dbase[collectionName].find({})
+        
+        #Will prompt error when the collection have already exists
+        if mydata.collection.name != user:
+            #Insert df to mongodb
+            collectionNew = dbase[user]
+    
+    result = dbase[user].find({"name" : "admin"})
+    
+    if result == "":
+        return render_template('loginpage.html')
+    else:
+        collectionNew.insert_one(admin)
+        return render_template('loginpage.html')
 
 def allowed_file(filename):
      return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -74,6 +99,13 @@ def ReadALLFiles(filepath):
 #Going to profile page
 @app.route('/profile', methods=['POST', 'GET'])
 def profile():
+    if request.method == 'POST':
+        #post the username
+        users = mongo.db.users
+        userProfileName = users.find_one({'name' : request.form['username']})
+        #Get the username
+        name = request.form.get('name')
+        return render_template('profile.html',userProfileName = userProfileName)
     return render_template('profile.html')
 
 #Going to Home page
@@ -98,28 +130,66 @@ def logout():
 #Going to the table page
 @app.route('/table', methods=['POST', 'GET'])
 def tables():
-    return render_template('tables.html')    
+    #Get collection name
+    collection = dbase.list_collection_names()
+    #Get selectedvalue
+    filename = str(request.form.get("columnname"))
+    
+    #get the table with the selected value from db
+    df = pd.DataFrame.from_dict(json_normalize(dbase[filename].find({})))
+    
+    return render_template('tables.html',  columnnames = collection , df_html = [df.to_html()], titles=[''])    
+
+# @app.route('/printtable', methods=['POST', 'GET'])
+# def dropdownlist():
+#     #Get selectedvalue
+#     filename = request.form.get("columnname")
+#     #get the table with the selected value from db
+#     table = dbase[filename].find({})
+    
+#     return render_template('tables.html', table = table)
 
 #Going to the chart page
 @app.route('/chart', methods=['POST', 'GET'])
 def chart():
-    return render_template('chart.html')    
+    #Get collection name
+    collection = dbase.list_collection_names()
+    #Get selectedvalue
+    filename = str(request.form.get("columnname"))
+    
+    #get the table with the selected value from db
+    df = pd.DataFrame.from_dict(json_normalize(dbase[filename].find({})))
+    
+    return render_template('chart.html',columnnames = collection , df_html = [df.to_html()], titles=[''])    
 
 #Going to the graph page
 @app.route('/graph2', methods=['POST', 'GET'])
 def graph2():
-    return render_template('graph2.html') 
-  
-
+    #Get collection name
+    collection = dbase.list_collection_names()
+    #Get selectedvalue
+    filename = str(request.form.get("columnname"))
+    
+    #get the table with the selected value from db
+    df = pd.DataFrame.from_dict(json_normalize(dbase[filename].find({})))
+    return render_template('graph2.html',columnnames = collection , df_html = [df.to_html()], titles=['']) 
+        
+@app.route('/graph2', methods=['POST', 'GET'])
+def showgraph():
+    df = DataFrame(list(collection.find({})))
+    dfhtml = df.head(30).to_html(index=False)
+    graphJSON = figPlotly(df)
+    figstatic= figStatic(df)
+    return render_template('graph.html', table=dfhtml,graphJSON=graphJSON,figstatic=figstatic) 
 
 #Login session
 @app.route('/loginpage', methods=['POST'])
 def login():
-    users = mongo.db.users
+    users = dbase["users"]
     login_user = users.find_one({'name' : request.form['username']})
 
     if login_user:
-        if bcrypt.hashpw(request.form['password'].encode('utf-8'), login_user['password']) == login_user['password']:
+        if request.form['password'] == login_user['mainpassword']:
             session['username'] = request.form['username']
             return redirect(url_for('upload'))
 
@@ -133,8 +203,8 @@ def register():
         existing_user = users.find_one({'name' : request.form['username']})
 
         if existing_user is None:
-            hashpass = bcrypt.hashpw(request.form['pass'].encode('utf-8'), bcrypt.gensalt())
-            users.insert_one({'name' : request.form['username'], 'password' : hashpass})
+            # hashpass = bcrypt.hashpw(request.form['pass'].encode('utf-8'), bcrypt.gensalt())
+            users.insert_one({'name' : request.form['username'], 'mainpassword' : request.form['pass']})
             session['username'] = request.form['username']
             return 'Successfully created!'
         
@@ -146,7 +216,7 @@ def register():
 # def logout():
 #     # remove the username from the session if it's there
 #     session.pop('username', None)
-#     return redirect(url_for('index'))
+#     return render_template('loginpage.html')
 
 @app.route('/upload' , methods=['GET', 'POST'])
 def movetoupload():
@@ -154,71 +224,64 @@ def movetoupload():
     
 @app.route('/graph' , methods=['GET', 'POST'])
 def movetoindex():
-    df = DataFrame(list(collection.find({})))
+    df = DataFrame(list(dbase["disney_movies.csv"].find({})))
     dfhtml = df.head(30).to_html(index=False)
     graphJSON = figPlotly(df)
     figstatic= figStatic(df)
     return render_template('graph.html', table=dfhtml,graphJSON=graphJSON,figstatic=figstatic)                                           
     
     
-@app.route('/upload2', methods=['POST','GET'])
+@app.route('/upload2', methods=['POST','GET'],)
 def upload():
         return render_template('upload2.html')
-def upload2():
+
+@app.route('/uploadfile', methods=['POST','GET'],)
+def uploadfile():
     #Upload file flask
-    file = request.files['inputFile']
+    file = request.files['inputFile']   
     #Extract upload data file name
     filename = secure_filename(file.filename)
    
-    # create the folders when setting up your app
-    os.makedirs(os.path.join(app.instance_path, 'uploaded_files'), exist_ok=True)
-
-    if file and allowed_file(file.filename):
-        #Upload to local filepaths
-        if file !='': 
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
-            usersave = User(filepath=file.filename)
-            usersave.save()
-            #Can only import csv
-            df = pd.read_csv(file)
-            #Upload to mongodb
-            dbase = client['Fyp-Test']
+    #Upload to local filepaths
+    if (".csv" in filename) and (file !=''): 
+        #Can only import csv
+        df = pd.read_csv(file)
+        #Upload to mongodb
+        dbase = client['Fyp-Test']
+        
+        collection = dbase.list_collection_names()
+        
+        #Get collections
+        for collectionName in collection:
+            mydata = dbase[collectionName].find({})
             
-            collection = dbase.list_collection_names()
-            
-            #Create collections
-            for collectionName in collection:
-                mydata = dbase[collectionName].find({})
-                
-                #Will prompt error when the collection have already exists
-                if mydata.collection.name != filename:
-                    try:
-                        dbase.create_collection(filename)
-                        #Insert df to mongodb
-                        collectionNew = dbase[filename]
-                        collectionNew.insert_many(df.to_dict('records'))
-                        
-                        #Display the table 
-                        df_html = df.to_html()
-                        
+            #Will prompt error when the collection have already exists
+            if mydata.collection.name != filename:
+                try:
+                    #Insert df to mongodb
+                    collectionNew = dbase[filename]
+                    collectionNew.insert_many(df.to_dict('records'))
                     
-                        flash('Successful')
-                        return render_template('upload2.html',data_var = df_html)
-                    except: 
-                        flash('Collection name has already exists')
-                        return render_template('upload2.html')
+                    #Display the table 
+                    df_html = df.to_html()
                     
-                else:
-                    flash('File name is repeated. Please try again.')
+                    return render_template('upload2.html',df_html = [df.to_html()], titles=[''])
+                except: 
+                    flash('Collection name has already exists')
                     return render_template('upload2.html')
-            
+                
+            else:
+                flash('File name is repeated. Please try again.')
+                return render_template('upload2.html')
+        
 
             flash('File successfully uploaded ' + file.filename + ' to the database!')
             return render_template('upload2.html')
-        else:
-            flash('Unable to upload') 
-            return redirect('error.html')    
-            
+    else:
+        flash('Unable to upload') 
+        return render_template('error.html')    
+
+#Use disney_movies.csv
 #indexpage
 import matplotlib.pyplot as plt
 import json
@@ -227,10 +290,22 @@ import base64
 import plotly
 import plotly.graph_objects as go
 
+#class for data
+class data():
+    def cleandata():
+        collection = dbase.list_collection_names()
+        
+        #Get collections
+        for collectionName in collection:
+            mydata = dbase[collectionName].find({})
+            
+        return mydata
+
 def figStatic(df):
-    df = DataFrame(list(collection.find({})))
+    df = DataFrame(list(dbase["disney_movies.csv"].find({})))
     df["release_date"] = pd.to_datetime(df["release_date"])
-    with plt.style.context('dark_background'):
+    df["release_date"] = pd.DatetimeIndex(df['release_date']).year
+    with plt.style.context('ggplot'):
         plt.rcParams['lines.linewidth'] = 2
         plt.rcParams['lines.linestyle'] = '-.'
         plt.rc('lines', marker='o', markerfacecolor='r', markersize=8, markeredgecolor="r")
@@ -264,9 +339,10 @@ def figStatic(df):
         return fig_decoded
     
 def figPlotly(df):
-    df = DataFrame(list(collection.find({})))
+    df = DataFrame(list(dbase["disney_movies.csv"].find({})))
     df["release_date"] = pd.to_datetime(df["release_date"])
-
+    #change to year only
+    df["release_date"] = pd.DatetimeIndex(df['release_date']).year
     xx = df["release_date"].values.tolist()
     yy = df["total_gross"].values.tolist()
 
@@ -275,7 +351,7 @@ def figPlotly(df):
     fig.add_trace(go.Scatter(
             x = xx,
             y = yy,
-            name="Totale Casi",
+            name="Totale Gross",
             mode="lines+markers",
             showlegend=True,
             marker=dict(
@@ -284,7 +360,7 @@ def figPlotly(df):
             ),
             line=dict(
                 width=1,
-                color="rgb(0,255,0)",
+                color="rgb(0,0,0)",
                 dash="longdashdot"
             )
         )
@@ -309,8 +385,8 @@ def figPlotly(df):
             color="orange", #"#7f7f7f", 
         ),
         hovermode='x',  #['x', 'y', 'closest', False]
-        plot_bgcolor = "rgb(10,10,10)",
-        paper_bgcolor="rgb(0,0,0)"
+        plot_bgcolor = "rgb(200,200,200)",
+        paper_bgcolor="rgb(255,255,255)"
     )
 
     #htmlfig = fig.write_html("fig.html")
