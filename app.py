@@ -396,10 +396,14 @@ import pandas as pd
 import glob
 from pandas import DataFrame, json_normalize
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import bcrypt
 
 from login import *
 from upload import *
+=======
+# import bcrypt
+>>>>>>> Stashed changes
 =======
 # import bcrypt
 >>>>>>> Stashed changes
@@ -443,8 +447,11 @@ class User(db.Document):
 @app.route('/')
 def main():
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     return render_template('loginpage.html')
 =======
+=======
+>>>>>>> Stashed changes
     #default admin account
     admin = {
         "name" : "admin",
@@ -469,6 +476,9 @@ def main():
     else:
         collectionNew.insert_one(admin)
         return render_template('loginpage.html')
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 def allowed_file(filename):
@@ -491,6 +501,7 @@ def ReadALLFiles(filepath):
 def profile():
     if request.method == 'POST':
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         #post the username
         users = mongo.db.users
         userProfileName = users.find_one({'name' : request.form['username']})
@@ -499,6 +510,8 @@ def profile():
         return render_template('profile.html',userProfileName = userProfileName)
     return render_template('profile.html')
 =======
+=======
+>>>>>>> Stashed changes
         if request.form['employee_name'] !="" and request.form['employee_id'] !="" and request.form['employee_role'] !="" and request.form['username'] !="" and request.form['password'] !="":
             #create a list for new account
             new_account = [{'employee_name' : request.form['employee_name'],'employee_id' : request.form['employee_id'], 'employee_role' : request.form['employee_role'], 'name' : request.form['username'], 'mainpassword' : request.form['password']}]
@@ -513,6 +526,9 @@ def profile():
         else:
             return render_template('profile.html', errormessage = "You have missing blanks. Please fill in all information.")
     return render_template('profile.html', errormessage = "Successfully created a new account")
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 #Going to Home page
@@ -611,8 +627,13 @@ def register():
 
         if existing_user is None:
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             hashpass = bcrypt.hashpw(request.form['pass'].encode('utf-8'), bcrypt.gensalt())
             users.insert_one({'name' : request.form['username'], 'password' : hashpass, 'mainpassword' : request.form['pass']})
+=======
+            # hashpass = bcrypt.hashpw(request.form['pass'].encode('utf-8'), bcrypt.gensalt())
+            users.insert_one({'name' : request.form['username'], 'mainpassword' : request.form['pass']})
+>>>>>>> Stashed changes
 =======
             # hashpass = bcrypt.hashpw(request.form['pass'].encode('utf-8'), bcrypt.gensalt())
             users.insert_one({'name' : request.form['username'], 'mainpassword' : request.form['pass']})
