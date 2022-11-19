@@ -395,10 +395,14 @@ import urllib.request
 import pandas as pd
 import glob
 from pandas import DataFrame, json_normalize
+<<<<<<< Updated upstream
 import bcrypt
 
 from login import *
 from upload import *
+=======
+# import bcrypt
+>>>>>>> Stashed changes
 
 #Connect to localhost mongodb
 app = Flask(__name__)
@@ -438,7 +442,34 @@ class User(db.Document):
 #Main Page
 @app.route('/')
 def main():
+<<<<<<< Updated upstream
     return render_template('loginpage.html')
+=======
+    #default admin account
+    admin = {
+        "name" : "admin",
+        "password" : "hashpw",
+        "mainpassword" : "1234"
+    }
+    
+    user = "users"
+    #Create default admin account
+    for collectionName in collection:
+        mydata = dbase[collectionName].find({})
+        
+        #Will prompt error when the collection have already exists
+        if mydata.collection.name != user:
+            #Insert df to mongodb
+            collectionNew = dbase[user]
+    
+    result = dbase[user].find({"name" : "admin"})
+    
+    if result == "":
+        return render_template('loginpage.html')
+    else:
+        collectionNew.insert_one(admin)
+        return render_template('loginpage.html')
+>>>>>>> Stashed changes
 
 def allowed_file(filename):
      return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -459,6 +490,7 @@ def ReadALLFiles(filepath):
 @app.route('/profile', methods=['POST', 'GET'])
 def profile():
     if request.method == 'POST':
+<<<<<<< Updated upstream
         #post the username
         users = mongo.db.users
         userProfileName = users.find_one({'name' : request.form['username']})
@@ -466,6 +498,22 @@ def profile():
         name = request.form.get('name')
         return render_template('profile.html',userProfileName = userProfileName)
     return render_template('profile.html')
+=======
+        if request.form['employee_name'] !="" and request.form['employee_id'] !="" and request.form['employee_role'] !="" and request.form['username'] !="" and request.form['password'] !="":
+            #create a list for new account
+            new_account = [{'employee_name' : request.form['employee_name'],'employee_id' : request.form['employee_id'], 'employee_role' : request.form['employee_role'], 'name' : request.form['username'], 'mainpassword' : request.form['password']}]
+            #post the username
+            users = mongo.db.users
+            userProfileName = users.find_one({'employee_name' : request.form['employee_name'],'name' : request.form['username']})
+            #check if account exist
+            if not userProfileName :
+                users.insert_many(new_account)
+            else:
+                return render_template('profile.html', errormessage = "Account have been created before.")
+        else:
+            return render_template('profile.html', errormessage = "You have missing blanks. Please fill in all information.")
+    return render_template('profile.html', errormessage = "Successfully created a new account")
+>>>>>>> Stashed changes
 
 #Going to Home page
 @app.route('/home', methods=['POST', 'GET'])
@@ -548,7 +596,7 @@ def login():
     login_user = users.find_one({'name' : request.form['username']})
 
     if login_user:
-        if bcrypt.hashpw(request.form['password'].encode('utf-8'), login_user['password']) == login_user['password']:
+        if request.form['password'] == login_user['mainpassword']:
             session['username'] = request.form['username']
             return redirect(url_for('upload'))
 
@@ -562,8 +610,13 @@ def register():
         existing_user = users.find_one({'name' : request.form['username']})
 
         if existing_user is None:
+<<<<<<< Updated upstream
             hashpass = bcrypt.hashpw(request.form['pass'].encode('utf-8'), bcrypt.gensalt())
             users.insert_one({'name' : request.form['username'], 'password' : hashpass, 'mainpassword' : request.form['pass']})
+=======
+            # hashpass = bcrypt.hashpw(request.form['pass'].encode('utf-8'), bcrypt.gensalt())
+            users.insert_one({'name' : request.form['username'], 'mainpassword' : request.form['pass']})
+>>>>>>> Stashed changes
             session['username'] = request.form['username']
             return 'Successfully created!'
         
@@ -575,7 +628,7 @@ def register():
 # def logout():
 #     # remove the username from the session if it's there
 #     session.pop('username', None)
-#     return redirect(url_for('index'))
+#     return render_template('loginpage.html')
 
 @app.route('/upload' , methods=['GET', 'POST'])
 def movetoupload():
@@ -648,6 +701,17 @@ from io import BytesIO
 import base64
 import plotly
 import plotly.graph_objects as go
+
+#class for data
+class data():
+    def cleandata():
+        collection = dbase.list_collection_names()
+        
+        #Get collections
+        for collectionName in collection:
+            mydata = dbase[collectionName].find({})
+            
+        return mydata
 
 def figStatic(df):
     df = DataFrame(list(dbase["disney_movies.csv"].find({})))

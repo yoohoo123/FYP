@@ -218,6 +218,7 @@
   <section class="section is-main-section">
     <div class="tile is-ancestor">
       <div class="tile is-parent">
+<<<<<<< Updated upstream
         <div class="card tile is-child">
           <header class="card-header">
             <p class="card-header-title">
@@ -258,53 +259,82 @@
             </form>
           </div>
         </div>
+=======
+        {% if errormessage %}
+          <p class=errormessage><strong>Message:</strong> {{ errormessage }}
+        {% endif %}
+>>>>>>> Stashed changes
       </div>
     </div>
     <div class="card">
       <header class="card-header">
         <p class="card-header-title">
           <span class="icon"><i class="mdi mdi-lock default"></i></span>
-          Change Password
+          Create Employee Account
         </p>
       </header>
       <div class="card-content">
         <form>
           <div class="field is-horizontal">
             <div class="field-label is-normal">
-              <label class="label">Current password</label>
+              <label class="label">Employee Name</label>
             </div>
             <div class="field-body">
               <div class="field">
                 <div class="control">
-                  <input type="password" name="password_current" autocomplete="current-password" class="input" required>
+                  <input type="text" name="employee_name" autocomplete="current-password" class="input" required>
                 </div>
-                <p class="help">Required. Your current password</p></div>
+                <p class="help">Required.</p></div>
+            </div>
+          </div>
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Employee ID</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <div class="control">
+                  <input type="text" name="employee_id" autocomplete="current-password" class="input" required>
+                </div>
+                <p class="help">Required.</p></div>
+            </div>
+          </div>
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">Employee Role</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <div class="control">
+                  <input type="text" name="employee_role" autocomplete="current-password" class="input" required>
+                </div>
+                <p class="help">Required.</p></div>
             </div>
           </div>
           <hr>
           <div class="field is-horizontal">
             <div class="field-label is-normal">
-              <label class="label">New password</label>
+              <label class="label">New UserName</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <div class="control">
+                  <input type="text" autocomplete="new-password" name="username" class="input" required>
+                </div>
+                <p class="help">Required.</p>
+              </div>
+            </div>
+          </div>
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label">New Password</label>
             </div>
             <div class="field-body">
               <div class="field">
                 <div class="control">
                   <input type="password" autocomplete="new-password" name="password" class="input" required>
                 </div>
-                <p class="help">Required. New password</p>
-              </div>
-            </div>
-          </div>
-          <div class="field is-horizontal">
-            <div class="field-label is-normal">
-              <label class="label">Confirm password</label>
-            </div>
-            <div class="field-body">
-              <div class="field">
-                <div class="control">
-                  <input type="password" autocomplete="new-password" name="password_confirmation" class="input" required>
-                </div>
-                <p class="help">Required. New password one more time</p>
+                <p class="help">Required.</p>
               </div>
             </div>
           </div>
