@@ -161,14 +161,14 @@
       <p class="menu-label">About</p>
       <ul class="menu-list">
         <li>
-          <a href="https://github.com/vikdiesel/admin-one-bulma-dashboard" target="_blank" class="has-icon">
+          <a href="https://github.com/yoohoo123/FYP" target="_blank" class="has-icon">
             <span class="icon"><i class="mdi mdi-github-circle"></i></span>
             <span class="menu-item-label">GitHub</span>
           </a>
         </li>
         <li>
           <!-- Give the link to our marketing website -->
-          <a href="https://justboil.me/bulma-admin-template/free-html-dashboard/" class="has-icon">
+          <a href="https://dockerproject.wordpress.com/" class="has-icon">
             <span class="icon"><i class="mdi mdi-help-circle"></i></span>
             <span class="menu-item-label">About</span>
           </a>
@@ -215,35 +215,35 @@
 
 
   <!-- main -->
+  <div class="pretty_container" >    
+    <img src="data:image/png;base64,{{ figstatic  | safe }}"\>
+</div>
+<style>  
+  img {  
+  max-width: 100%;  
+  height: auto;  
+  }  
+  </style>
   <section class="section is-main-section">
     <div class="navbar-item has-control">
       <div class="control">
-        <form class="gettable" method="POST" action="{{ url_for('chart') }}">
-          <label for="exampleFormControlFile2">Select a file: </label>
-          <select id="columnname" name="columnname" style="width:500px;" >
-            <option value= "Default" selected>Choose one</option>
-            {% for name in columnnames %}
-            {% if ".csv" in name%}
-            <option id = "name" value= "{{ name }}" >{{ name }}</option>
-            {% endif%}
-            {% endfor %}
-          </select>
-          <button type="submit" value="Submit" >GO</button>
-        </form>
-      <div id='chart' class='chart'></div>
+          <div>
+            {{ table | safe }}  
+        </div>
       </div>
-    </div>
-    <div>
-      <div>
-        <table id = "table">
-          <h1>
-            <!--Displaying the converted table-->
-            {% for table in df_html %}
-            <h2>{{titles[loop.index]}}</h2>                            
-            {{ table|safe }}
-            {% endfor %}  
-          </h1>
-        </table>
+           
+
+        <!--<script>
+            $(document).ready( function () {
+                $('.dataframe').DataTable();
+                
+                var graph = {{graphJSON | safe}};
+                console.log(graph)
+                Plotly.newPlot("graph", graph.data, graph.layout);
+            } 
+        );
+    </script>-->
+      <div id='chart' class='chart'></div>
       </div>
     </div>
     <!--

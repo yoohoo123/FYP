@@ -38,6 +38,7 @@ app.config['UPLOAD_PATH'] = ''
 ALLOWED_EXTENSIONS = set(['csv', 'xlsx', 'xls', 'txt'])
 
 #User
+
 db = MongoEngine()
 db.init_app(app)  
 
@@ -113,12 +114,15 @@ def profile():
                 return render_template('profile.html', errormessage = "Account have been created before.")
         else:
             return render_template('profile.html', errormessage = "You have missing blanks. Please fill in all information.")
-    return render_template('profile.html', errormessage = "Successfully created a new account")
+    return render_template('profile.html')
 
 #Going to Home page
 @app.route('/home', methods=['POST', 'GET'])
 def home():
-    return render_template('home.html')
+    df = DataFrame(list(dbase["disney_movies.csv"].find({})))
+    graphJSON = figPlotly(df)
+    figstatic= figStatic(df)
+    return render_template('home.html',graphJSON=graphJSON,figstatic=figstatic)
 
 #Going to the setting page
 @app.route('/settings', methods=['POST', 'GET'])
@@ -147,15 +151,6 @@ def tables():
     
     return render_template('tables.html',  columnnames = collection , df_html = [df.to_html()], titles=[''])    
 
-# @app.route('/printtable', methods=['POST', 'GET'])
-# def dropdownlist():
-#     #Get selectedvalue
-#     filename = request.form.get("columnname")
-#     #get the table with the selected value from db
-#     table = dbase[filename].find({})
-    
-#     return render_template('tables.html', table = table)
-
 #Going to the chart page
 @app.route('/chart', methods=['POST', 'GET'])
 def chart():
@@ -166,8 +161,11 @@ def chart():
     
     #get the table with the selected value from db
     df = pd.DataFrame.from_dict(json_normalize(dbase[filename].find({})))
-    
-    return render_template('chart.html',columnnames = collection , df_html = [df.to_html()], titles=[''])    
+
+    # dfhtml = df.head(30).to_html(index=False)
+    graphJSON = figPlotly(df)
+    figstatic= figStatic(df)
+    return render_template('chart.html',columnnames = collection , df_html = [df.to_html()], titles=[''],graphJSON=graphJSON,figstatic=figstatic)    
 
 #Going to the graph page
 @app.route('/graph2', methods=['POST', 'GET'])
@@ -179,15 +177,16 @@ def graph2():
     
     #get the table with the selected value from db
     df = pd.DataFrame.from_dict(json_normalize(dbase[filename].find({})))
-    return render_template('graph2.html',columnnames = collection , df_html = [df.to_html()], titles=['']) 
-        
-@app.route('/graph2', methods=['POST', 'GET'])
-def showgraph():
-    df = DataFrame(list(collection.find({})))
-    dfhtml = df.head(30).to_html(index=False)
     graphJSON = figPlotly(df)
-    figstatic= figStatic(df)
-    return render_template('graph.html', table=dfhtml,graphJSON=graphJSON,figstatic=figstatic) 
+    return render_template('graph2.html',columnnames = collection , df_html = [df.to_html()], titles=[''],graphJSON=graphJSON) 
+        
+# @app.route('/chart2', methods=['POST', 'GET'])
+# def showgraph():
+#     df = DataFrame(list(dbase.collection.find({})))
+#     dfhtml = df.head(30).to_html(index=False)
+#     graphJSON = figPlotly(df)
+#     figstatic= figStatic(df)
+#     return render_template('chart.html', table=dfhtml,graphJSON=graphJSON,figstatic=figstatic) 
 
 #Login session
 @app.route('/loginpage', methods=['POST'])
@@ -218,12 +217,6 @@ def register():
         return 'That username already exists!'
 
     return render_template('register.html')
-
-# @app.route('/logout')
-# def logout():
-#     # remove the username from the session if it's there
-#     session.pop('username', None)
-#     return render_template('loginpage.html')
 
 @app.route('/upload' , methods=['GET', 'POST'])
 def movetoupload():
